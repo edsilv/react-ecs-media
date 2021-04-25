@@ -1,47 +1,60 @@
-import ReactDOM from 'react-dom'
-import React from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Entity, Facet, useAnimationFrame, useECS, useQuery, useSystem } from '@react-ecs/core'
-import { Vector3 } from 'three'
-import { ThreeView } from '@react-ecs/three'
-import { Torus } from '@react-three/drei'
+import ReactDOM from "react-dom";
+import React from "react";
+import { Canvas } from "@react-three/fiber";
+import {
+  Entity,
+  Facet,
+  useAnimationFrame,
+  useECS,
+  useQuery,
+  useSystem
+} from "@react-ecs/core";
+// import { Vector3 } from "three";
+import { ThreeView } from "@react-ecs/three";
+import { OrbitControls } from "@react-three/drei";
 
-import './index.css'
+import "./index.css";
 
-class Spin extends Facet<Spin> {
-  amount? = new Vector3(0, 1, 0)
+class Image extends Facet<Image> {
+  src: string = "";
 }
 
-const SpinSystem = () => {
-  const query = useQuery((e) => e.hasAll(ThreeView, Spin))
+const ImageSystem = () => {
+  const query = useQuery((e) => e.hasAll(ThreeView, Image));
 
   return useSystem((dt) => {
-    query.loop([ThreeView, Spin], (e, [view, spin]) => {
-      const rot = view.object3d.rotation
-      rot.x += spin.amount.x * dt
-      rot.y += spin.amount.y * dt
-      rot.z += spin.amount.z * dt
-    })
-  })
-}
+    query.loop([ThreeView, Image], (e, [view, image]) => {
+      const mesh = view.object3d;
 
-const CoolSim = () => {
-  const ECS = useECS()
-  useAnimationFrame(ECS.update)
+      // <planeBufferGeometry attach="geometry" args={[3, 4]} />
+      // <meshBasicMaterial toneMapped={false} map={texture} />
+      // const rot = view.object3d.rotation;
+      // rot.x += image.amount.x * dt;
+      // rot.y += image.amount.y * dt;
+      // rot.z += image.amount.z * dt;
+    });
+  });
+};
+
+const Scene = () => {
+  const ECS = useECS();
+  useAnimationFrame(ECS.update);
 
   return (
     <Canvas>
       <ECS.Provider>
-        <SpinSystem />
+        <ambientLight intensity={1} />
+        <OrbitControls />
+        <ImageSystem />
         <Entity>
-          <Spin />
+          <Image src="https://images.unsplash.com/photo-1504203254088-9fa5c8dc55ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=2466&q=80" />
           <ThreeView>
-            <Torus />
+            <mesh></mesh>
           </ThreeView>
         </Entity>
       </ECS.Provider>
     </Canvas>
-  )
-}
+  );
+};
 
-ReactDOM.render(<CoolSim />, document.getElementById('root'))
+ReactDOM.render(<Scene />, document.getElementById("root"));
